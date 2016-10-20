@@ -6,7 +6,7 @@ from .gtfb import gtfb
 
 class FIR(gtfb):
 
-    def __init__(self, complexresponse=False, L=None, **kwargs):
+    def __init__(self, complexresponse=False, L=None, reversetime=False, **kwargs):
         """Initialize FIR gammatone filterbank coefficients."""
         gtfb.__init__(self, **kwargs)
 
@@ -29,6 +29,9 @@ class FIR(gtfb):
         # if real result is wanted, convert now
         if not complexresponse:
             self.ir = self.ir.real
+            
+        if reversetime:
+            self.ir = np.fliplr(self.ir)
                
         # set initial conditions
         self._clear()
