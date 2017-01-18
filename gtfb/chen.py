@@ -18,8 +18,11 @@ class Chen(gtfb):
         self.Ak = np.exp(-self._normB + 1j*self._omega)
         self.Ak2 = self.Ak**2
         self.Ak3 = self.Ak**3
-        # per-channel gain
-        ERBstep = np.diff(np.hstack((self.cfs, self.fs/2)))/self.ERB
+        # per-channel gain is based on the difference (in ERB) to the
+        # next filter.  This does not work for the last filter, so we 
+        # duplicate it
+        ERBstep = np.diff(self.cfs)/self.ERB[:-1]
+        ERBstep = np.hstack((ERBstep, ERBstep[-1]))
         self.Bk = np.sqrt(2)*ERBstep*((1-self.Ak)**4)/(self.Ak+4*self.Ak2+self.Ak3)
         # phase alignment
         N_PE = np.round(3/self._normB)
@@ -47,7 +50,7 @@ class Chen(gtfb):
                             [1, -2*self.Ak[n], self.Ak2[n]], insig, zi=self._ics0[n])
             stage2out, self._ics1[n] = lfilter([1,], [1, -2*self.Ak[n], self.Ak2[n]], 
                                                stage1out, zi=self._ics1[n])
-            out[:,n] = self.Bk[n]*self.Ck[n]*stage2out
+            out[:, n] = self.Bk[n]*self.Ck[n]*stage2out
         return out
 
     def process_single(self, insig, n):
