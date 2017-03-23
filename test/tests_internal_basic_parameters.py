@@ -1,5 +1,5 @@
 import numpy as np
-import gtfb
+from gtfblib.gtfb import gtfb
 
 matparams_cf_32ch = [  80.00,  109.51,  141.84,  177.26,
                       216.07,  258.58,  305.16,  356.18,

@@ -1,8 +1,8 @@
-# Compiled python modules.
+*~
+.ipynb_checkpoints
 *.pyc
-
-# Setuptools distribution folder.
-/dist/
-
-# Python egg metadata, regenerated from source files by setuptools.
-/*.egg-info
+.DS_Store
+__pycache__
+build
+dist
+gtfblib.egg-info
