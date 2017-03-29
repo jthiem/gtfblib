@@ -49,29 +49,20 @@ class Chen(gtfb):
         
     def _clear(self):
         """clear initial conditions"""
-        self._ics0 = [lfiltic([self.Ak[n], 4*self.Ak2[n], self.Ak3[n]], 
-                              [1, -2*self.Ak[n], self.Ak2[n]], np.complex128([]))
-            for n in range(self.nfilt)]
-        self._ics1 = [lfiltic([1,], 
-                              [1, -2*self.Ak[n], self.Ak2[n]], np.complex128([]))
-            for n in range(self.nfilt)]
+        self._ics = np.vstack([lfiltic(self.ComplexB[n, :], 
+            self.ComplexA[n, :], np.complex128([]))
+            for n in range(self.nfilt)])
     
     def process(self, insig):
         """Process one-dimensional signal, returning an array of signals
         which are the outputs of the filters"""
-        out = np.zeros((insig.shape[0], self.nfilt), dtype=np.complex128)
+        out = np.zeros((self.nfilt, insig.shape[0]), dtype=np.complex128)
         for n in range(self.nfilt):
-            stage1out, self._ics0[n] = lfilter([self.Ak[n], 4*self.Ak2[n], self.Ak3[n]], 
-                            [1, -2*self.Ak[n], self.Ak2[n]], insig, zi=self._ics0[n])
-            stage2out, self._ics1[n] = lfilter([1,], [1, -2*self.Ak[n], self.Ak2[n]], 
-                                               stage1out, zi=self._ics1[n])
-            out[:, n] = self.Bk[n]*self.Ck[n]*stage2out
+            out[n, :], self._ics[n, :] = lfilter(self.ComplexB[n, :],
+                self.ComplexA[n, :], insig, zi=self._ics[n, :])
         return out
 
     def process_single(self, insig, n):
         """Process a signal with just one of the filters of the
         filterbank, without affecting the state."""
-        stage1out = lfilter([self.Ak[n], 4*self.Ak2[n], self.Ak3[n]], 
-                            [1, -2*self.Ak[n], self.Ak2[n]], insig)
-        stage2out = lfilter([1,], [1, -2*self.Ak[n], self.Ak2[n]], stage1out)
-        return self.Bk[n]*self.Ck[n]*stage2out
+        return lfilter(self.ComplexB[n, :], self.ComplexA[n, :], insig)
