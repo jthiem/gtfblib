@@ -1,27 +1,40 @@
+from __future__ import division       
 import numpy as np
 
 def Hz2ERBnum(Hz):
+    """Return the ERB filter number for a given frequency.""" 
     return 21.4*np.log10(Hz*0.00437 + 1.0)
 
 def ERBnum2Hz(ERB):
+    """Return the frequency of given ERB filter."""
     return (10**(ERB/21.4)-1)/4.37e-3
+
+def ERBspacing_given_N(cf_first, cf_last, N):
+    ERB_first = Hz2ERBnum(cf_first)
+    ERB_last = Hz2ERBnum(cf_last)
+    cfs = ERBnum2Hz(np.linspace(ERB_first, ERB_last, N))
+    return cfs
+
+def ERBspacing_given_spacing(cf_first, cf_last, ERBstep):
+    ERB_first = Hz2ERBnum(cf_first)
+    ERB_last = Hz2ERBnum(cf_last)
+    cfs = ERBnum2Hz(np.arange(ERB_first, ERB_last, ERBstep))
+    return cfs
 
 class gtfb:
     """Superclass for gammatone filterbank objects."""
     
-    def __init__(self, fs=16000, frange=[80, 5000], nfilt=32, cfs=None):
+    def __init__(self, fs=16000, cfs=None):
 
         if cfs is None:
-            ERBlo = Hz2ERBnum(frange[0])
-            ERBhi = Hz2ERBnum(frange[1])
-            cfs = ERBnum2Hz(np.linspace(ERBlo, ERBhi, nfilt))
+            cfs = ERBspacing_given_N(80, 0.9*fs/2, 32)
 
         self.cfs = cfs
-        self.ERB = 0.1079*cfs+24.7
+        self.ERB = 1.0186*(0.108*cfs+24.7)
         self.nfilt = cfs.shape[0]
         self.fs = fs
 
         # shortcuts used by derived methods
         self._omega = 2*np.pi*cfs/fs
-        self._normB = 2*np.pi*1.019*self.ERB/fs
+        self._normB = 2*np.pi*self.ERB/fs
 
