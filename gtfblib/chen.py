@@ -23,8 +23,8 @@ class Chen(gtfb):
         # duplicate it
         ERBstep = np.diff(Hz2ERBnum(self.cfs))
         ERBstep = np.hstack((ERBstep, ERBstep[-1]))
-        self.Bk = np.sqrt(2)*ERBstep* \
-            ((1-np.abs(self.Ak))**4)/(np.abs(self.Ak)+4*np.abs(self.Ak2)+np.abs(self.Ak3))
+        self.Bk = (np.sqrt(2) * ERBstep * ((1-np.abs(self.Ak))**4)
+                   /(np.abs(self.Ak)+4*np.abs(self.Ak2)+np.abs(self.Ak3)))
         # phase alignment
         N_PE = np.round(3/self._normB).astype(int)
         self.Ck = np.exp(-1j*self._omega*np.fmin(N_GD, N_PE))
@@ -42,16 +42,15 @@ class Chen(gtfb):
         for n in range(self.nfilt):
             self.ComplexA[n, :] = [1, -4*self.Ak[n], 6*self.Ak2[n], 
                                    -4*self.Ak3[n], self.Ak[n]**4]
-            self.ComplexB[n, self.Dk[n]+1:self.Dk[n]+4] = self.Bk[n] * self.Ck[n] \
-                * np.array([self.Ak[n], 4*self.Ak2[n], self.Ak3[n]])
+            self.ComplexB[n, self.Dk[n]+1:self.Dk[n]+4] = self.Bk[n] \
+                * self.Ck[n] * np.array([self.Ak[n], 4*self.Ak2[n], self.Ak3[n]])
                 
         self._clear()
         
     def _clear(self):
         """clear initial conditions"""
         self._ics = np.vstack([lfiltic(self.ComplexB[n, :], 
-            self.ComplexA[n, :], np.complex128([]))
-            for n in range(self.nfilt)])
+            self.ComplexA[n, :], np.complex128([])) for n in range(self.nfilt)])
     
     def process(self, insig):
         """Process one-dimensional signal, returning an array of signals
