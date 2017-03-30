@@ -40,7 +40,7 @@ class OZGTFB(gtfb):
     def process(self, insig):
         """Process one-dimensional signal, returning an array of signals
         which are the outputs of the filters"""
-        out = np.zeros((insig.shape[0], self.nfilt))
+        out = np.zeros((self.nfilt, insig.shape[0]))
         for n in range(self.nfilt):
             stage1out, self._ics0[n] = lfilter([1, -1],
                 self._feedback[n,:], insig, zi=self._ics0[n])
@@ -50,7 +50,7 @@ class OZGTFB(gtfb):
                 self._feedback[n,:], stage2out, zi=self._ics2[n])
             stage4out, self._ics3[n] = lfilter([1,],
                 self._feedback[n,:], stage3out, zi=self._ics3[n])
-            out[:,n] = self._gain[n]*stage4out
+            out[n, :] = self._gain[n]*stage4out
         return out
 
     def process_single(self, insig, n):
