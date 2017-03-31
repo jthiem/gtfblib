@@ -3,11 +3,11 @@ import numpy as np
 
 def Hz2ERBnum(Hz):
     """Return the ERB filter number for a given frequency.""" 
-    return 21.4*np.log10(Hz*0.00437 + 1.0)
+    return 21.4*np.log10(Hz*4.37e-3 + 1.0)
 
 def ERBnum2Hz(ERB):
     """Return the frequency of given ERB filter."""
-    return (10**(ERB/21.4)-1)/4.37e-3
+    return (10**(ERB/21.4)-1.0)/4.37e-3
 
 def ERBspacing_given_N(cf_first, cf_last, N):
     ERB_first = Hz2ERBnum(cf_first)
