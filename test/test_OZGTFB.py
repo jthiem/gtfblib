@@ -9,7 +9,7 @@ from test_aux_functions import peak_error
 
 refData = loadmat('test/OZGTFB16kTestdata.mat', squeeze_me=True)
 fs = 16000
-insig = refData['x']
+insig = loadmat('test/Inputdata.mat', squeeze_me=True)['indata16k']
 refout = refData['y']
 
 def test_OZGTFB_setup():

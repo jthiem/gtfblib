@@ -2,7 +2,7 @@ from setuptools import setup
 import gtfblib
 
 setup(name='gtfblib',
-      version='0.2.0',
+      version='0.2.0dev',
       description='A selection of Gammatone Filterbanks',
       url='http://github.com/jthiem/gtfblib',
       author='Joachim Thiemann',

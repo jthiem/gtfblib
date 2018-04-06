@@ -9,8 +9,8 @@ from test_aux_functions import peak_error
 
 refData = loadmat('test/Chen8kTestdata.mat', squeeze_me=True)
 fs = 8000
-insig = refData['x']
-refout = refData['x_bk_csn']
+insig = loadmat('test/Inputdata.mat', squeeze_me=True)['indata8k']
+refout = refData['y']
 
 def test_Chen_setup():
     fbChen = Chen(fs=fs, cfs=ERBspacing_given_spacing(80, 0.9*4000, .5))
