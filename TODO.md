@@ -3,3 +3,6 @@
   a bit more memory but saving reconverting the time domain impulse into
   frequency domain in every invocation.
   
+- Slaney's 1995 gammatone filters should be implemented before I release 
+  this library to 1.0.0
+  

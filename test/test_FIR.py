@@ -42,6 +42,7 @@ def test_FIR_ir():
     assert(peak_error(fbFIR.ir, Fdata['G'][()].T.conj())<1e-10)
 
 def test_FIR_process():
+    fbFIR._clear()
     outsig = fbFIR.process(insig)
     assert(peak_error(outsig, refout)<1e-10)
 
@@ -50,6 +51,7 @@ def test_FIR_process_single():
     assert(peak_error(outsig, refout[:, 10])<1e-10)
 
 def test_FIR_process_memory():
+    fbFIR._clear()
     outsig1 = fbFIR.process(insig[:800])
     outsig2 = fbFIR.process(insig[800:])
     outsig = np.vstack((outsig1, outsig2))

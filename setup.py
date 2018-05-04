@@ -1,8 +1,7 @@
 from setuptools import setup
-import gtfblib
 
 setup(name='gtfblib',
-      version='0.2.0dev',
+      version='0.3.0',
       description='A selection of Gammatone Filterbanks',
       url='http://github.com/jthiem/gtfblib',
       author='Joachim Thiemann',
