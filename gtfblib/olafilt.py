@@ -2,6 +2,7 @@
 # Overlap-add FIR filter, (c) Joachim Thiemann 2016
 # also available on its own from https://github.com/jthiem/overlapadd
 #
+from __future__ import division
 import numpy as np
 
 def olafilt(b, x, zi=None):

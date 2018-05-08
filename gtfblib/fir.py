@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.5
+from __future__ import division
 import numpy as np
 
 from .gtfb import gtfb
@@ -29,20 +29,20 @@ class FIR(gtfb):
             t = np.arange(1, L+1)/self.fs
             edelay = np.zeros(self.nfilt)
         if groupdelay is None:
-            groupdelay = int(np.ceil(self.fs*3/(2*np.pi*self.ERB[0])))
+            groupdelay = int(np.ceil(3/self._normB[0]))
             # print('Group delay set to', groupdelay)
         if groupdelay>0:
             t = np.arange(-groupdelay+1, L-groupdelay+1)/self.fs
-            edelay = 3/(2*np.pi*self.ERB)
+            edelay = 3/(self._normB*self.fs)
         self.groupdelay = groupdelay
 
         # compute impulse responses
-        self.ir = np.zeros((L, self.cfs.shape[0]), dtype=np.complex128)
+        self.ir = np.zeros((self.nfilt, L), dtype=np.complex128)
         for n, cf in enumerate(self.cfs):
-            env = ((2*np.pi*self.ERB[n])**4)/6 * (t+edelay[n])**3 \
-                    * np.exp(-2*np.pi*self.ERB[n]*(t+edelay[n]))
+            env = ((self._normB[n]*self.fs)**4)/6 * (t+edelay[n])**3 \
+                    * np.exp(-self._normB[n]*self.fs*(t+edelay[n]))
             env[env<0] = 0
-            self.ir[:, n] = env * np.exp(2*np.pi*1j*self.cfs[n]*t)
+            self.ir[n, :] = env * np.exp(2*np.pi*1j*self.cfs[n]*t)
 
         # if real result is wanted, convert now
         if not complexresponse:
@@ -60,11 +60,11 @@ class FIR(gtfb):
                              for n in range(self.nfilt)]
 
     def process(self, insig):
-        out = np.zeros((insig.shape[0], self.nfilt), dtype=self.ir.dtype)
+        out = np.zeros((self.nfilt, insig.shape[0]), dtype=self.ir.dtype)
         for n in range(self.nfilt):
-            out[:, n], self._memory[n] = olafilt(self.ir[:, n], insig,
+            out[n, :], self._memory[n] = olafilt(self.ir[n, :], insig,
                                                  self._memory[n])
         return out
 
     def process_single(self, insig, n):
-        return olafilt(self.ir[:, n], insig)
+        return olafilt(self.ir[n, :], insig)
