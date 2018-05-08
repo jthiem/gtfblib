@@ -1,14 +1,13 @@
-#!/usr/local/bin/python3
 from __future__ import division
 import numpy as np
 from numpy import cos, exp, pi, sin, sqrt
 from scipy.signal import lfilter, lfiltic
 
-from .gtfb import gtfb, Hz2ERBnum
+from .gtfb import gtfb
 
 class Slaney(gtfb):
 
-    def __init__(self, N_GD=None, EarQ=9.26449, Bfact=1.019, **kwargs):
+    def __init__(self, EarQ=9.26449, Bfact=1.019, **kwargs):
         """Initialize coefficients for GTFB as in Slaney 1993."""
         gtfb.__init__(self, EarQ=EarQ, Bfact=Bfact, **kwargs)
         T = 1/self.fs
@@ -49,22 +48,24 @@ class Slaney(gtfb):
         self.feedback[:,8] = exp(-8*B*T)
         # for testing and debugging
         self._gain = gain
+        # last task: initialize memory
+        self._clear()
 
     def _clear(self):
         """clear initial conditions"""
-        pass
+        self._ics = np.vstack([lfiltic(self.forward[n, :],
+            self.feedback[n, :], np.zeros((1))) for n in range(self.nfilt)])
 
     def process(self, insig):
         """Process one-dimensional signal, returning an array of signals
         which are the outputs of the filters"""
-        out = np.zeros((self.nfilt, insig.shape[0]), dtype=np.complex128)
-        #for n in range(self.nfilt):
-        #    out[n, :], self._ics[n, :] = lfilter(self.ComplexB[n, :],
-        #        self.ComplexA[n, :], insig, zi=self._ics[n, :])
+        out = np.zeros((self.nfilt, insig.shape[0]))
+        for n in range(self.nfilt):
+            out[n, :], self._ics[n, :] = lfilter(self.forward[n, :],
+                self.feedback[n, :], insig, zi=self._ics[n, :])
         return out
 
     def process_single(self, insig, n):
         """Process a signal with just one of the filters of the
         filterbank, without affecting the state."""
-        #return lfilter(self.ComplexB[n, :], self.ComplexA[n, :], insig)
-        pass
+        return lfilter(self.forward[n, :], self.feedback[n, :], insig)

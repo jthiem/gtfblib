@@ -40,7 +40,6 @@ def test_FIR_ir():
     fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
                 complexresponse=True)
 
-    print('FIR ir', peak_error(fbFIR.ir, Fdata['G'][()].T.conj()))
     assert(peak_error(fbFIR.ir, Fdata['G'][()].T.conj())<1e-10)
 
 def test_FIR_process():
@@ -52,7 +51,6 @@ def test_FIR_process():
     outsig = fbFIR.process(insig)
     refout = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['y']
 
-    print('FIR process', peak_error(outsig, refout))
     assert(peak_error(outsig, refout)<1e-10)
 
 def test_FIR_process_single():
@@ -64,7 +62,6 @@ def test_FIR_process_single():
     refout = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['y']
     outsig = fbFIR.process_single(insig, 10)
 
-    print('FIR process single', peak_error(outsig, refout[:, 10]))
     assert(peak_error(outsig, refout[:, 10])<1e-10)
 
 def test_FIR_process_memory():

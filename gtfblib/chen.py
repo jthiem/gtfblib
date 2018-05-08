@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+from __future__ import division
 import numpy as np
 from scipy.signal import lfilter, lfiltic
 
