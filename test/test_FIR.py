@@ -5,10 +5,7 @@ from scipy.io import loadmat
 from gtfblib.gtfb import ERBnum2Hz
 from gtfblib.fir import FIR
 
-#from test_aux_functions import peak_error
-def peak_error(a, b):
-    assert(a.shape==b.shape)
-    return np.max(np.abs(a-b))
+from test_aux_functions import peak_error
 
 # The FIR filterbank is designed to replicate the FB I used for my
 # Thesis work, which can be found at
@@ -29,35 +26,74 @@ def peak_error(a, b):
 # warning: some arrays are transposed depending on if you are using
 # MATLAB or Octave
 
-fs = 16000
-insig = loadmat('test/Inputdata.mat', squeeze_me=True)['indata16k']
-Fdata = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['FD']
-refout = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['y']
-fbFIR = FIR(fs=fs, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)), complexresponse=True)
-
 def test_FIR_ERB():
-    assert(peak_error(fbFIR.ERB, Fdata['b'][()])<1e-10)
+    # check if the filter bandwidths are calculated the same way
+    # as the MATLAB reference
+    Fdata = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['FD']
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
+    assert(peak_error(1.0186*fbFIR.ERB, Fdata['b'][()])<1e-10)
 
 def test_FIR_ir():
+    # check if the impulse response matches the MATLAB version
+    Fdata = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['FD']
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
+
+    print('FIR ir', peak_error(fbFIR.ir, Fdata['G'][()].T.conj()))
     assert(peak_error(fbFIR.ir, Fdata['G'][()].T.conj())<1e-10)
 
 def test_FIR_process():
-    fbFIR._clear()
+    # check if filtering works correctly
+    insig = loadmat('test/Inputdata.mat', squeeze_me=True)['indata16k']
+
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
     outsig = fbFIR.process(insig)
+    refout = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['y']
+
+    print('FIR process', peak_error(outsig, refout))
     assert(peak_error(outsig, refout)<1e-10)
 
 def test_FIR_process_single():
+    # check if a single channel is processed correctly
+    insig = loadmat('test/Inputdata.mat', squeeze_me=True)['indata16k']
+
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
+    refout = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['y']
     outsig = fbFIR.process_single(insig, 10)
+
+    print('FIR process single', peak_error(outsig, refout[:, 10]))
     assert(peak_error(outsig, refout[:, 10])<1e-10)
 
 def test_FIR_process_memory():
-    fbFIR._clear()
+    # check if processing a whole is the same as processing 2 chunks
+    insig = loadmat('test/Inputdata.mat', squeeze_me=True)['indata16k']
+
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
+    refout = fbFIR.process(insig)
+
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
     outsig1 = fbFIR.process(insig[:800])
     outsig2 = fbFIR.process(insig[800:])
     outsig = np.vstack((outsig1, outsig2))
+
     assert(peak_error(outsig, refout)<1e-10)
 
 def test_FIR_clear():
+    # make sure that if _clear() is called result is same as a brand
+    # new filterbank
+    insig = loadmat('test/Inputdata.mat', squeeze_me=True)['indata16k']
+
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
+    refout = fbFIR.process(insig)
+
+    fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
+                complexresponse=True)
     _ = fbFIR.process(np.random.randn(1000))
     fbFIR._clear()
     outsig = fbFIR.process(insig)

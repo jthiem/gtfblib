@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.5
+from __future__ import division
 import numpy as np
 
 from .gtfb import gtfb
@@ -29,11 +29,11 @@ class FIR(gtfb):
             t = np.arange(1, L+1)/self.fs
             edelay = np.zeros(self.nfilt)
         if groupdelay is None:
-            groupdelay = int(np.ceil(self.fs*3/(2*np.pi*self.ERB[0])))
+            groupdelay = int(np.ceil(3/self._normB[0]))
             # print('Group delay set to', groupdelay)
         if groupdelay>0:
             t = np.arange(-groupdelay+1, L-groupdelay+1)/self.fs
-            edelay = 3/(2*np.pi*self.ERB)
+            edelay = 3/(self._normB * self.fs)
         self.groupdelay = groupdelay
 
         # compute impulse responses

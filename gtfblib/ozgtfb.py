@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.5
+from __future__ import division
 import numpy as np
 from scipy.signal import lfilter, lfiltic
 
@@ -9,20 +9,20 @@ class OZGTFB(gtfb):
     def __init__(self, **kwargs):
         """Initialize OZGTFB coefficients."""
         gtfb.__init__(self, **kwargs)
-        
+
         # calculate filter coefficients
         z = np.exp(1j * self._omega);
         # feedback coefs
         self._feedback = np.ones((self.nfilt, 3))
         self._feedback[:,1] = -2*np.cos(self._omega)*np.exp(-self._normB)
         self._feedback[:,2] = np.exp(-2*self._normB)
-        
+
         # per-channel gain
         tSG = np.abs(1 - 2*np.cos(self._omega) * z *
             np.exp(-self._normB) + np.exp(-2*self._normB) * z**2)
         fG = np.abs(tSG/(1-z))
         self._gain = fG*tSG**3
-        
+
         # set initial conditions
         self._clear()
 
@@ -61,4 +61,3 @@ class OZGTFB(gtfb):
         stage3out = lfilter([1,], self._feedback[n,:], stage2out)
         stage4out = lfilter([1,], self._feedback[n,:], stage3out)
         return self._gain[n]*stage4out
-
