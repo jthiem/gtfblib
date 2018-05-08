@@ -40,7 +40,7 @@ def test_FIR_ir():
     fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
                 complexresponse=True)
 
-    assert(peak_error(fbFIR.ir, Fdata['G'][()].T.conj())<1e-10)
+    assert(peak_error(fbFIR.ir, Fdata['G'][()].conj())<1e-10)
 
 def test_FIR_process():
     # check if filtering works correctly
@@ -49,7 +49,7 @@ def test_FIR_process():
     fbFIR = FIR(fs=16000, cfs=ERBnum2Hz(np.arange(1, 32.1, .5)),
                 complexresponse=True)
     outsig = fbFIR.process(insig)
-    refout = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['y']
+    refout = loadmat('test/FIR16kTestdata.mat', squeeze_me=True)['y'].T
 
     assert(peak_error(outsig, refout)<1e-10)
 
@@ -76,7 +76,7 @@ def test_FIR_process_memory():
                 complexresponse=True)
     outsig1 = fbFIR.process(insig[:800])
     outsig2 = fbFIR.process(insig[800:])
-    outsig = np.vstack((outsig1, outsig2))
+    outsig = np.hstack((outsig1, outsig2))
 
     assert(peak_error(outsig, refout)<1e-10)
 

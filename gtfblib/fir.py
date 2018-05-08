@@ -37,19 +37,19 @@ class FIR(gtfb):
         self.groupdelay = groupdelay
 
         # compute impulse responses
-        self.ir = np.zeros((L, self.cfs.shape[0]), dtype=np.complex128)
+        self.ir = np.zeros((self.nfilt, L), dtype=np.complex128)
         for n, cf in enumerate(self.cfs):
             env = ((self._normB[n]*self.fs)**4)/6 * (t+edelay[n])**3 \
                     * np.exp(-self._normB[n]*self.fs*(t+edelay[n]))
             env[env<0] = 0
-            self.ir[:, n] = env * np.exp(2*np.pi*1j*self.cfs[n]*t)
+            self.ir[n, :] = env * np.exp(2*np.pi*1j*self.cfs[n]*t)
 
         # if real result is wanted, convert now
         if not complexresponse:
             self.ir = self.ir.real
 
         if reversetime:
-            self.ir = np.fliplr(self.ir)
+            self.ir = np.flipud(self.ir)
 
         # set initial conditions
         self._clear()
@@ -60,11 +60,11 @@ class FIR(gtfb):
                              for n in range(self.nfilt)]
 
     def process(self, insig):
-        out = np.zeros((insig.shape[0], self.nfilt), dtype=self.ir.dtype)
+        out = np.zeros((self.nfilt, insig.shape[0]), dtype=self.ir.dtype)
         for n in range(self.nfilt):
-            out[:, n], self._memory[n] = olafilt(self.ir[:, n], insig,
+            out[n, :], self._memory[n] = olafilt(self.ir[n, :], insig,
                                                  self._memory[n])
         return out
 
     def process_single(self, insig, n):
-        return olafilt(self.ir[:, n], insig)
+        return olafilt(self.ir[n, :], insig)
