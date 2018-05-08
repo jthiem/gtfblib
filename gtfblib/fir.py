@@ -33,14 +33,14 @@ class FIR(gtfb):
             # print('Group delay set to', groupdelay)
         if groupdelay>0:
             t = np.arange(-groupdelay+1, L-groupdelay+1)/self.fs
-            edelay = 3/(self._normB * self.fs)
+            edelay = 3/(self._normB*self.fs)
         self.groupdelay = groupdelay
 
         # compute impulse responses
         self.ir = np.zeros((L, self.cfs.shape[0]), dtype=np.complex128)
         for n, cf in enumerate(self.cfs):
-            env = ((2*np.pi*self.ERB[n])**4)/6 * (t+edelay[n])**3 \
-                    * np.exp(-2*np.pi*self.ERB[n]*(t+edelay[n]))
+            env = ((self._normB[n]*self.fs)**4)/6 * (t+edelay[n])**3 \
+                    * np.exp(-self._normB[n]*self.fs*(t+edelay[n]))
             env[env<0] = 0
             self.ir[:, n] = env * np.exp(2*np.pi*1j*self.cfs[n]*t)
 
