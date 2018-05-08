@@ -49,7 +49,7 @@ class FIR(gtfb):
             self.ir = self.ir.real
 
         if reversetime:
-            self.ir = np.flipud(self.ir)
+            self.ir = np.fliplr(self.ir)
 
         # set initial conditions
         self._clear()

@@ -95,3 +95,9 @@ def test_FIR_clear():
     fbFIR._clear()
     outsig = fbFIR.process(insig)
     assert(peak_error(outsig, refout)<1e-10)
+
+def test_FIR_reversetime():
+    # check if the reverse time option works as expected
+    fbFIR1 = FIR()
+    fbFIR2 = FIR(reversetime=True)
+    assert(all(f1.ir[10, ::-1]==f2.ir[10,:]))
